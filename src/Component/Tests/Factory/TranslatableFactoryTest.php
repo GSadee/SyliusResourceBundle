@@ -11,17 +11,17 @@
 
 declare(strict_types=1);
 
-namespace Sylius\Component\Resource\Tests\Factory;
+namespace Sylius\Resource\Tests\Factory;
 
 use PHPUnit\Framework\TestCase;
 use Prophecy\PhpUnit\ProphecyTrait;
 use Prophecy\Prophecy\ObjectProphecy;
-use Sylius\Component\Resource\Factory\TranslatableFactory;
-use Sylius\Component\Resource\Factory\TranslatableFactoryInterface as LegacyTranslatableFactoryInterface;
+use Sylius\Component\Resource\Exception\UnexpectedTypeException;
 use Sylius\Component\Resource\Translation\Provider\TranslationLocaleProviderInterface;
 use Sylius\Resource\Factory\FactoryInterface;
-use Sylius\Resource\Factory\TranslatableFactory as NewTranslatableFactory;
+use Sylius\Resource\Factory\TranslatableFactory;
 use Sylius\Resource\Factory\TranslatableFactoryInterface;
+use Sylius\Resource\Model\TranslatableInterface;
 
 final class TranslatableFactoryTest extends TestCase
 {
@@ -48,14 +48,27 @@ final class TranslatableFactoryTest extends TestCase
     }
 
     /** @test */
-    public function it_implements_legacy_translatable_factory_interface(): void
+    public function it_throws_an_exception_if_resource_is_not_translatable(): void
     {
-        $this->assertInstanceOf(LegacyTranslatableFactoryInterface::class, $this->translatableFactory);
+        $this->factory->createNew()->willReturn(new \stdClass());
+
+        $this->expectException(UnexpectedTypeException::class);
+
+        $this->translatableFactory->createNew();
     }
 
     /** @test */
-    public function it_should_be_an_alias_of_translatable_factory(): void
+    public function it_creates_translatable_and_sets_locales(): void
     {
-        $this->assertInstanceOf(NewTranslatableFactory::class, $this->translatableFactory);
+        $resource = $this->prophesize(TranslatableInterface::class);
+
+        $this->localeProvider->getDefaultLocaleCode()->willReturn('pl_PL');
+
+        $this->factory->createNew()->willReturn($resource);
+
+        $resource->setCurrentLocale('pl_PL')->shouldBeCalled();
+        $resource->setFallbackLocale('pl_PL')->shouldBeCalled();
+
+        $this->assertEquals($resource->reveal(), $this->translatableFactory->createNew());
     }
 }

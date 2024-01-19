@@ -11,16 +11,17 @@
 
 declare(strict_types=1);
 
-namespace Sylius\Component\Resource\Tests\Factory;
+namespace Sylius\Resource\Tests\Metadata;
 
 use PHPUnit\Framework\TestCase;
-use Sylius\Component\Resource\Factory\Factory;
-use Sylius\Component\Resource\Factory\FactoryInterface as LegacyFactoryInterface;
-use Sylius\Resource\Factory\Factory as NewFactory;
+use Prophecy\PhpUnit\ProphecyTrait;
+use Sylius\Resource\Factory\Factory;
 use Sylius\Resource\Factory\FactoryInterface;
 
 final class FactoryTest extends TestCase
 {
+    use ProphecyTrait;
+
     private Factory $factory;
 
     protected function setUp(): void
@@ -32,18 +33,6 @@ final class FactoryTest extends TestCase
     public function it_implements_factory_interface(): void
     {
         $this->assertInstanceOf(FactoryInterface::class, $this->factory);
-    }
-
-    /** @test */
-    public function it_implements_legacy_factory_interface(): void
-    {
-        $this->assertInstanceOf(LegacyFactoryInterface::class, $this->factory);
-    }
-
-    /** @test */
-    public function it_is_an_alias_of_the_factory(): void
-    {
-        $this->assertInstanceOf(NewFactory::class, $this->factory);
     }
 
     /** @test */
